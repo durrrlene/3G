@@ -1,0 +1,59 @@
+---
+title: "tidyingAgeAndCourse"
+author: "Darlene Erl Lapso"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r}
+#getting the age average
+
+age <- c(deets$Age)
+```
+
+```{r}
+#converting age to numeric form
+
+age <- as.numeric(gsub("[^0-9]", "", as.character(age)))
+```
+
+```{r}
+#removes zeros
+
+age <- as.numeric(gsub("0$", "", as.character(age)))
+```
+
+```{r}
+#neglecting NAs in solving average
+ave_age <- mean(age, na.rm = TRUE)
+
+ave_age
+```
+
+
+```{r}
+# removing decimals on ave_age
+(ave_age <- floor(ave_age))
+```
+
+```{r}
+#fills in the NAs with the ave_age
+age[is.na(age)] <- ave_age
+```
+
+```{r}
+# syncing to data
+deets$Age <- age
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
