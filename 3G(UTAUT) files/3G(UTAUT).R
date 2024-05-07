@@ -4,7 +4,7 @@ library(knitr)
 
 
 # Read the Excel file
-questionnaire <- read_excel("dataCleaning_questionnaire/questionnaire3g.xlsx")
+questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
 
 conversion <- function(response) {
   if (response == "Strongly Disagree") {
@@ -21,39 +21,28 @@ conversion <- function(response) {
 }
 
 # Apply conversion function to each column
-columns_to_convert <- c(
-  "By using the Adobe application enables you to accomplish tasks more quickly.",
-  "By using the Adobe application it increases my productivity.",
-  "The Adobe application makes work more interesting.",
-  "My peers influence necessary to use the Adobe application.",
-  "People who are important to me think that I should use the Adobe application.",
-  "I have the resources necessary to use the Adobe application.",
-  "My peers is available for assistance with Adobe application's difficulties.",
-  "I could complete a job or task using the Adobe application if  there was no one around to tell me what to do as I go.",
-  "I could complete a job or task using the Adobe application if I had a lot of time to complete the job for which the software was provided.",
-  "I could complete a job or task using the Adobe application if I had just the built-in help facility for assistance."
-)
+columns_to_convert <- c(10, 11, 12, 14, 17, 19, 20, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32)
 
-for (column in columns_to_convert) {
-  questionnaire[[column]] <- sapply(questionnaire[[column]], conversion)
+for (column_index in columns_to_convert) {
+  questionnaire[[column_index]] <- sapply(questionnaire[[column_index]], conversion)
 }
 
 
 conversion1 <- function(response) {
-  if (response == "Yes") {
+  if (is.na(response)) {
+    return(NA)
+  } else if (response == "Yes") {
     return(1)
-  } else {
+  } else if (response == "No") {
     return(2)
+  } else if (response == "Possibly") {
+    return(3)
+  } else {
+    return(NA)
   }
 }
 
-columns_to_convert1<- c(
-  "In general, the school has supported the use of the Adobe application",
-  "I know the knowledge necessary to use the Adobe application.",
-  "I intend to use the Adobe application in the next 2 months.",
-  "I predict I will use the Adobe application in the next 2 months.",
-  "I plan to use the system in the next 2 months."
-)
+columns_to_convert1 <- c(9,15,16,18,21,24,33,34,35)
 
 for (column in columns_to_convert1) {
   questionnaire[[column]] <- sapply(questionnaire[[column]], conversion1)
@@ -61,104 +50,94 @@ for (column in columns_to_convert1) {
 
 View(questionnaire)
 
+
 #Mean and Standard Deviation
 # Calculate the mean and sd for Performance Expectancy
-performanceExpectancy <- c(
-  "By using the Adobe application enables you to accomplish tasks more quickly.",
-  "By using the Adobe application it increases my productivity."
-)
+performanceExpectancy <- questionnaire[, c(9:11)]
 
-means1 <- colMeans(questionnaire[performanceExpectancy], na.rm = TRUE)
-means1
+means1 <- colMeans(performanceExpectancy, na.rm = TRUE)
+sd_pe <- sapply(performanceExpectancy, sd, na.rm = TRUE)
 
-sd_pe <- sapply(questionnaire[performanceExpectancy], sd, na.rm = TRUE)
-sd_pe
 
 #calculate the mean and sd for Effort Expectancy
-effortExpectancy <- c(
-  "My interaction with the Adobe application would be clear and understandable.",
-  "It would be easy for me to become more skillful at using the Adobe application.",
-  "Learning to operate the Adobe application is easy for me."
-)
+effortExpectancy <- questionnaire[, c(12:14)]
 
-means2 <- colMeans(questionnaire[effortExpectancy], na.rm = TRUE)
+means2 <- colMeans(effortExpectancy, na.rm = TRUE)
 means2
 
-sd_ee <- sapply(questionnaire[effortExpectancy], sd, na.rm = TRUE)
+sd_ee <- sapply(effortExpectancy, sd, na.rm = TRUE)
 sd_ee
 
 #calculate the mean and sd for Social Influence
-socialInfluence<- c(
-  "My peers influence necessary to use the Adobe application.",
-  "People who are important to me think that I should use the Adobe application."
-)
+socialInfluence<- questionnaire[, c(19:21)]
 
-means3 <- colMeans(questionnaire[socialInfluence], na.rm = TRUE)
+means3 <- colMeans(socialInfluence, na.rm = TRUE)
 means3
 
-sd_si <- sapply(questionnaire[socialInfluence], sd, na.rm = TRUE)
+sd_si <- sapply(socialInfluence, sd, na.rm = TRUE)
 sd_si
 
 #calculate the mean for Facilitating Conditions
-facilitatingConditions <- c(
-  "I have the resources necessary to use the Adobe application.",
-  "My peers is available for assistance with Adobe application's difficulties.",
-  "I know the knowledge necessary to use the Adobe application."
-)
+facilitatingConditions <- questionnaire[, c(22:25)]
 
-means4 <- colMeans(questionnaire[facilitatingConditions], na.rm = TRUE)
+means4 <- colMeans(facilitatingConditions, na.rm = TRUE)
 means4
 
-sd_fc <- sapply(questionnaire[facilitatingConditions], sd, na.rm = TRUE)
+sd_fc <- sapply(facilitatingConditions, sd, na.rm = TRUE)
 sd_fc
 
 #Calculate the mean for Behavioral Intention to use the system
-behavioralIntention <- c(
-  "I intend to use the Adobe application in the next 2 months.",
-  "I predict I will use the Adobe application in the next 2 months.",
-  "I plan to use the system in the next 2 months."
-)
+behavioralIntention <- questionnaire[, c(33:35)]
 
-means5 <- colMeans(questionnaire[behavioralIntention], na.rm = TRUE)
+means5 <- colMeans(behavioralIntention, na.rm = TRUE)
 means5
 
-sd_bi <- sapply(questionnaire[behavioralIntention], sd, na.rm = TRUE)
+sd_bi <- sapply(behavioralIntention, sd, na.rm = TRUE)
 sd_bi
 
-#Combine all factors using kable() function
+#####Make a data frame of all factors######
+item_labels <- colnames(questionnaire[, c(9:11)])
+
 pe <- data.frame(
-  Factor = "Performance Expectancy",
-  Mean = colMeans(questionnaire[performanceExpectancy], na.rm = TRUE),
-  SD = sapply(questionnaire[performanceExpectancy], sd, na.rm = TRUE)
+  Items = item_labels ,
+  Description = "Performance Expectancy",
+  Mean = means1,
+  SD = sd_pe
 )
+
+View(pe)
 
 ee <- data.frame(
-  Factor = "Effort Expectancy",
-  Mean = colMeans(questionnaire[effortExpectancy], na.rm = TRUE),
-  SD = sapply(questionnaire[effortExpectancy], sd, na.rm = TRUE)
+  Description = "Effort Expectancy",
+  Mean = means2,
+  SD = sd_ee
 )
 
+
 si <- data.frame(
-  Factor = "Social Influence",
-  Mean = colMeans(questionnaire[socialInfluence], na.rm = TRUE),
-  SD = sapply(questionnaire[socialInfluence], sd, na.rm = TRUE)
+  Description = "Social Influence",
+  Mean = means3,
+  SD = sd_si
 )
 
 fc <- data.frame(
-  Factor = "Facilitating Conditions",
-  Mean = colMeans(questionnaire[facilitatingConditions], na.rm = TRUE),
-  SD = sapply(questionnaire[facilitatingConditions], sd, na.rm = TRUE)
+  Description = "Facilitating Conditions",
+  Mean = means4,
+  SD = sd_fc
 )
 
 bi <- data.frame(
-  Factor = "Behavioral Intention",
-  Mean = colMeans(questionnaire[behavioralIntention], na.rm = TRUE),
-  SD = sapply(questionnaire[behavioralIntention], sd, na.rm = TRUE)
+  Description = "Behavioral Intention",
+  Mean = means5,
+  SD = sd_bi
 )
 
-summary_table <- rbind(pe, ee, si, fc, bi)
-table<-  kable(summary.table)
-View(table)
+#####Combine all factors using kable() function######
+summary <- rbind(pe, ee, si, fc, bi)
+summary_table<-  kable(summary)
+View(summary_table)
+
+View(summary)
 
 
 
