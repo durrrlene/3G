@@ -2,6 +2,9 @@ library(readxl)
 library(dplyr)
 library(tidyr)
 library(knitr)
+library(openxlsx)
+library(ggplot2)
+
 
 
 
@@ -35,9 +38,37 @@ age
 deets$Age <- age
 deets$Age
 
+# graphs for age ( PIE CHART )
+
+age_counts <- table(age)
+percentages <- round(prop.table(age_counts) * 100, 1)
+pie(age_counts, main = "Ages", labels = paste(names(age_counts), "\n", percentages, "%", sep = ""), col = rainbow(length(age_counts)), cex = 0.7)
+legend("topright", legend = paste(names(age_counts), "-", percentages, "%", sep = ""), cex = 0.6, fill = rainbow(length(age_counts)))
+
+
 
 # Applying the revisions
 View(deets)
+
+
+# ---------------------------------- Sex 
+
+males <- subset(deets, Sex == "Male")
+females <- subset(deets, Sex == "Female")
+
+sex_counts <- data.frame(
+  Sex = c("Male", "Female"),
+  Count = c(nrow(males), nrow(females))
+)
+
+ggplot(sex_counts, aes(x = Sex, y = Count, fill = Sex)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Distribution of Males and Females",
+       x = "Sex",
+       y = "Count") +
+  scale_fill_manual(values = c("Male" = "skyblue", "Female" = "pink"))
+
+
 
 
 
@@ -81,6 +112,82 @@ deets$Course
 View(deets)
 
 # HAY FINALLY KAPOY BA HAHAHA
+
+
+# -------------------------------------- course -------------------------
+
+course <- deets$Course
+
+categorize_course <- function(course) {
+  if (grepl("IT|CS|BSIT", course)) {
+    return("Computer Literature")
+  }
+  else if (grepl("ED|BSED", course)) {
+    return("Education")
+  }
+  else if (grepl("BSA|BSBA", course)) {
+    return("Business and Finance")
+  }
+  else if (grepl("CE", course)) {
+    return("Engineering")
+  }
+  else if (grepl("BSHM", course)) {
+   return("Hospitality Management") 
+  }
+  else {
+    return("Other")
+  }
+}
+  
+course_categories <- sapply(course, categorize_course)
+
+# count the data of each category
+category_counts <- table(course_categories)
+
+
+# convert the table to a data frame
+category_counts_df <- as.data.frame(category_counts)
+names(category_counts_df) <- c("Category", "Count")
+
+
+# create the bar plot
+ggplot(category_counts_df, aes(x = Category, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Course Distribution by Category",
+       x = "Category",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("Computer Literature" = "skyblue",
+                               "Education" = "pink",
+                               "Business and Finance" = "orange",
+                               "Engineering" = "green",
+                               "Hospitality Management" = "yellow",
+                               "Other" = "grey"))
+
+
+
+# ----------------------------------- School --------------------------
+
+school <- deets$School
+
+school_factor <- factor(School)
+
+school_counts <- table(school_factor)
+
+school_counts_df <- as.data.frame(school_counts)
+names(school_counts_df) <- c("School", "Count")
+
+# Sort the data frame by Count in descending order
+school_counts_df <- school_counts_df[order(-school_counts_df$Count), ]
+
+# Create the bar plot
+ggplot(school_counts_df, aes(x = reorder(School, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "School Distribution",
+       x = "School",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_flip()
 
 
 
@@ -251,5 +358,11 @@ bi <- data.frame(
 
 
 data_summary <- rbind(pe, ee, si, fc, bi)
+
 table <-  kable(data_summary)
 View(table)
+
+
+write.xlsx(deets, "C:/Users/steve/Documents/3G/DataCleaning(3G)/manipulated_data.xlsx", row.names = FALSE)
+
+
