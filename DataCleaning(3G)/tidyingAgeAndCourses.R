@@ -8,8 +8,8 @@ library(ggplot2)
 
 
 
-orig <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
-deets <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
+orig <- read_excel("DataCleaning(3G)/questionnaire3g.xlsx")
+deets <- read_excel("DataCleaning(3G)/questionnaire3g.xlsx")
 
 
 #getting the age average
@@ -51,7 +51,7 @@ legend("topright", legend = paste(names(age_counts), "-", percentages, "%", sep 
 View(deets)
 
 
-# ---------------------------------- Sex 
+# ---------------------------------- Sex
 
 males <- subset(deets, Sex == "Male")
 females <- subset(deets, Sex == "Female")
@@ -100,7 +100,7 @@ to_bsa <- c(25, 28)
 deets$Course[to_bsa] <- "BSA"
 
 # to bshm
-to_bshm <- c(29, 98) 
+to_bshm <- c(29, 98)
 deets$Course[to_bshm] <- "BSHM"
 
 # to bs phar
@@ -111,7 +111,6 @@ deets$Course
 
 View(deets)
 
-# HAY FINALLY KAPOY BA HAHAHA
 
 
 # -------------------------------------- course -------------------------
@@ -132,13 +131,13 @@ categorize_course <- function(course) {
     return("Engineering")
   }
   else if (grepl("BSHM", course)) {
-   return("Hospitality Management") 
+    return("Hospitality Management")
   }
   else {
     return("Other")
   }
 }
-  
+
 course_categories <- sapply(course, categorize_course)
 
 # count the data of each category
@@ -190,8 +189,10 @@ ggplot(school_counts_df, aes(x = reorder(School, -Count), y = Count)) +
   coord_flip()
 
 
-
   # ------------------------------------ UTAUT ---------------------------
+
+# Read the Excel file
+questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
 
 conversion <- function(response) {
   if (response == "Strongly Disagree") {
@@ -207,162 +208,135 @@ conversion <- function(response) {
   }
 }
 
+# Apply conversion function to each column
+columns_to_convert <- c(10, 11, 12, 14, 17, 19, 20, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32)
 
-columns_to_convert <- c(
-  "By using the Adobe application enables you to accomplish tasks more quickly.",
-  "By using the Adobe application it increases my productivity.",
-  "The Adobe application makes work more interesting.",
-  "My peers influence necessary to use the Adobe application.",
-  "People who are important to me think that I should use the Adobe application.",
-  "I have the resources necessary to use the Adobe application.",
-  "My peers is available for assistance with Adobe application's difficulties.",
-  "I could complete a job or task using the Adobe application if  there was no one around to tell me what to do as I go.",
-  "I could complete a job or task using the Adobe application if I had a lot of time to complete the job for which the software was provided.",
-  "I could complete a job or task using the Adobe application if I had just the built-in help facility for assistance."
-)
-
-for (column in columns_to_convert) {
-  deets[[column]] <- sapply(deets[[column]], conversion)
+for (column_index in columns_to_convert) {
+  questionnaire[[column_index]] <- sapply(questionnaire[[column_index]], conversion)
 }
 
+
 conversion1 <- function(response) {
-  if (response == "Yes") {
+  if (is.na(response)) {
+    return(NA)
+  } else if (response == "Yes") {
     return(1)
-  } else {
+  } else if (response == "No") {
     return(2)
+  } else if (response == "Possibly") {
+    return(3)
+  } else {
+    return(NA)
   }
 }
 
-columns_to_convert1<- c(
-  "In general, the school has supported the use of the Adobe application",
-  "I know the knowledge necessary to use the Adobe application.",
-  "I intend to use the Adobe application in the next 2 months.",
-  "I predict I will use the Adobe application in the next 2 months.",
-  "I plan to use the system in the next 2 months."
-)
+columns_to_convert1 <- c(9,15,16,18,21,24,33,34,35)
 
 for (column in columns_to_convert1) {
-  deets[[column]] <- sapply(deets[[column]], conversion1)
+  questionnaire[[column]] <- sapply(questionnaire[[column]], conversion1)
 }
 
-View(deets)
+View(questionnaire)
 
 
-performanceExpectancy <- c(
-  "By using the Adobe application enables you to accomplish tasks more quickly.",
-  "By using the Adobe application it increases my productivity."
-)
+#Mean and Standard Deviation
+# Calculate the mean and sd for Performance Expectancy
+performanceExpectancy <- questionnaire[, c(9:11)]
 
-# getting the average
-means1 <- colMeans(deets[performanceExpectancy], na.rm = TRUE)
-means1
+means1 <- colMeans(performanceExpectancy, na.rm = TRUE)
+sd_pe <- sapply(performanceExpectancy, sd, na.rm = TRUE)
 
-# getting the standard deviation
-sd_pe <- sapply(deets[performanceExpectancy], sd, na.rm = TRUE)
-sd_pe
+avg_mean1 <- round(mean(means1), 2)
+avg_sd1 <- round(mean(sd_pe), 2)
 
 
-# calculate the mean and sd for Effort Expectancy
-effortExpectancy <- c(
-  "My interaction with the Adobe application would be clear and understandable.",
-  "It would be easy for me to become more skillful at using the Adobe application.",
-  "Learning to operate the Adobe application is easy for me."
-)
+# Calculate the mean and sd for Effort Expectancy
+effortExpectancy <- questionnaire[, c(12:14)]
 
-# average
-means2 <- colMeans(deets[effortExpectancy], na.rm = TRUE)
-means2
+means2 <- colMeans(effortExpectancy, na.rm = TRUE)
+sd_ee <- sapply(effortExpectancy, sd, na.rm = TRUE)
 
-# standard deviation
-sd_ee <- sapply(deets[effortExpectancy], sd, na.rm = TRUE)
-sd_ee
+avg_mean2 <- round(mean(means2), 2)
+avg_sd2 <- round(mean(sd_ee), 2)
 
+# Calculate the mean and sd for Social Influence
+socialInfluence <- questionnaire[, c(19:21)]
 
-#calculate the mean and sd for Social Influence
-socialInfluence<- c(
-  "My peers influence necessary to use the Adobe application.",
-  "People who are important to me think that I should use the Adobe application."
-)
+means3 <- colMeans(socialInfluence, na.rm = TRUE)
+sd_si <- sapply(socialInfluence, sd, na.rm = TRUE)
 
-# average
-means3 <- colMeans(deets[socialInfluence], na.rm = TRUE)
-means3
+avg_mean3 <- round(mean(means3), 2)
+avg_sd3 <- round(mean(sd_si), 2)
 
-# standard deviation
-sd_si <- sapply(deets[socialInfluence], sd, na.rm = TRUE)
-sd_si
+# Calculate the mean and sd for Facilitating Conditions
+facilitatingConditions <- questionnaire[, c(22:25)]
 
+means4 <- colMeans(facilitatingConditions, na.rm = TRUE)
+sd_fc <- sapply(facilitatingConditions, sd, na.rm = TRUE)
 
-#calculate the mean for Facilitating Conditions
-facilitatingConditions <- c(
-  "I have the resources necessary to use the Adobe application.",
-  "My peers is available for assistance with Adobe application's difficulties.",
-  "I know the knowledge necessary to use the Adobe application."
-)
+avg_mean4 <- round(mean(means4), 2)
+avg_sd4 <- round(mean(sd_fc), 2)
 
-# average
-means4 <- colMeans(deets[facilitatingConditions], na.rm = TRUE)
-means4
+# Calculate the mean and sd for Behavioral Intention to use the system
+behavioralIntention <- questionnaire[, c(33:35)]
 
-# standard deviation
-sd_fc <- sapply(deets[facilitatingConditions], sd, na.rm = TRUE)
-sd_fc
+means5 <- colMeans(behavioralIntention, na.rm = TRUE)
+sd_bi <- sapply(behavioralIntention, sd, na.rm = TRUE)
 
+avg_mean5 <- round(mean(means5), 2)
+avg_sd5 <- round(mean(sd_bi), 2)
 
-#Calculate the mean for Behavioral Intention to use the system
-behavioralIntention <- c(
-  "I intend to use the Adobe application in the next 2 months.",
-  "I predict I will use the Adobe application in the next 2 months.",
-  "I plan to use the system in the next 2 months."
-)
+#####Make a data frame of all factors######
+#item_labels <- colnames(questionnaire[, c(9:11)])
 
-# average
-means5 <- colMeans(deets[behavioralIntention], na.rm = TRUE)
-means5
-
-# standard deviation
-sd_bi <- sapply(deets[behavioralIntention], sd, na.rm = TRUE)
-sd_bi
-
-
-# combine all factors using kable() function
 pe <- data.frame(
-  Factor = "Performance Expectancy",
-  Mean = colMeans(deets[performanceExpectancy], na.rm = TRUE),
-  SD = sapply(deets[performanceExpectancy], sd, na.rm = TRUE)
+  #Items = item_labels,
+  Description = "Performance Expectancy",
+  Mean = means1,
+  SD = sd_pe,
+  Average_Mean = avg_mean1,
+  Average_SD = avg_sd1
 )
 
 ee <- data.frame(
-  Factor = "Effort Expectancy",
-  Mean = colMeans(deets[effortExpectancy], na.rm = TRUE),
-  SD = sapply(deets[effortExpectancy], sd, na.rm = TRUE)
+  Description = "Effort Expectancy",
+  Mean = means2,
+  SD = sd_ee,
+  Average_Mean = total_mean2,
+  Average_SD = total_sd2
 )
 
+
 si <- data.frame(
-  Factor = "Social Influence",
-  Mean = colMeans(deets[socialInfluence], na.rm = TRUE),
-  SD = sapply(deets[socialInfluence], sd, na.rm = TRUE)
+  Description = "Social Influence",
+  Mean = means3,
+  SD = sd_si,
+  Average_Mean = total_mean3,
+  Average_SD = total_sd3
 )
 
 fc <- data.frame(
-  Factor = "Facilitating Conditions",
-  Mean = colMeans(deets[facilitatingConditions], na.rm = TRUE),
-  SD = sapply(deets[facilitatingConditions], sd, na.rm = TRUE)
+  Description = "Facilitating Conditions",
+  Mean = means4,
+  SD = sd_fc,
+  Average_Mean = total_mean4,
+  Average_SD = total_sd4
 )
 
 bi <- data.frame(
-  Factor = "Behavioral Intention",
-  Mean = colMeans(deets[behavioralIntention], na.rm = TRUE),
-  SD = sapply(deets[behavioralIntention], sd, na.rm = TRUE)
+  Description = "Behavioral Intention",
+  Mean = means5,
+  SD = sd_bi,
+  Average_Mean = total_mean5,
+  Average_SD = total_sd5
 )
 
+#####Combine all factors using kable() function######
+summary <- rbind(pe, ee, si, fc, bi)
+summary_table<-  kable(summary)
+View(summary_table)
 
-data_summary <- rbind(pe, ee, si, fc, bi)
 
-table <-  kable(data_summary)
-View(table)
-
-
-write.xlsx(deets, "C:/Users/steve/Documents/3G/DataCleaning(3G)/manipulated_data.xlsx", row.names = FALSE)
+write.xlsx(deets, "DataCleaning(3G)/manipulated_data.xlsx", row.names = FALSE)
 
 
