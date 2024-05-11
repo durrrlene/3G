@@ -1,0 +1,534 @@
+---
+title: "tidyingAgeAndCourse"
+author: "Darlene Erl Lapso"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+always_allow_html: yes
+---
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(openxlsx)
+library(ggplot2)
+library(plotly)
+``` 
+# main files
+```{r}
+orig <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
+deets <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
+```
+
+
+
+
+# AGE
+```{r}
+#getting the age average
+
+age <- c(deets$Age)
+```
+
+```{r}
+#converting age to numeric form
+
+age <- as.numeric(gsub("[^0-9]", "", as.character(age)))
+```
+
+```{r}
+#removes zeros
+
+age <- as.numeric(gsub("0$", "", as.character(age)))
+```
+
+```{r}
+#neglecting NAs in solving average
+ave_age <- mean(age, na.rm = TRUE)
+
+ave_age
+```
+
+
+```{r}
+# removing decimals on ave_age
+(ave_age <- floor(ave_age))
+```
+
+```{r}
+#fills in the NAs with the ave_age
+age[is.na(age)] <- ave_age
+```
+
+```{r}
+# syncing to data
+deets$Age <- age
+```
+
+```{r}
+# graphs for age ( PIE CHART )
+age_counts <- table(age)
+percentages <- round(prop.table(age_counts) * 100, 1)
+pie_age <- pie(age_counts, main = "Ages", labels = paste(names(age_counts), "\n", percentages, "%", sep = ""), col = rainbow(length(age_counts)), cex = 0.7)
+legend("topright", legend = paste(names(age_counts), "-", percentages, "%", sep = ""), cex = 0.6, fill = rainbow(length(age_counts)))
+
+```
+The predominance of 19-20s in Adobe application usage, with half of respondents falling within their 20s. This demographic trend highlights the importance of targeting and catering to the needs and preferences of younger users in the creative software industry.
+
+
+
+
+# SEX
+```{r}
+males <- subset(deets, Sex == "Male")
+females <- subset(deets, Sex == "Female")
+
+sex_counts <- data.frame(
+  Sex = c("Male", "Female"),
+  Count = c(nrow(males), nrow(females))
+)
+
+ggplot(sex_counts, aes(x = Sex, y = Count, fill = Sex)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Distribution of Males and Females",
+       x = "Sex",
+       y = "Count") +
+  scale_fill_manual(values = c("Male" = "skyblue", "Female" = "pink"))
+
+```
+The data indicates a relatively balanced usage of Adobe applications between genders, suggesting widespread adoption across both male and female demographics. Regardless of gender the balanced usage between genders highlights the utility of Adobe software. 
+
+
+# COURSES
+```{r}
+# show courses
+print(deets$Course[25:60])
+```
+We can see here that there are messy inputs we receive from the respondents. Therefore, we will clean all that by replacing it to its acronyms.
+
+```{r}
+# replacing long terms to acronyms
+
+# to BSIT
+to_bsit <- c(1, 14, 46, 56, 59, 61, 68)
+deets$Course[to_bsit] <- "BSIT"
+
+# to BSCE
+to_bsce <- c(2)
+deets$Course[to_bsce] <- "BSCE"
+
+#to BS Agri
+to_bsagri <- c(17, 40)
+deets$Course[to_bsagri] <- "BS Agri"
+
+# to BS Chem
+to_bschem <- c(16, 80)
+deets$Course[to_bschem] <- "BS Chem"
+
+# to bsa
+to_bsa <- c(25, 28)
+deets$Course[to_bsa] <- "BSA"
+
+# to bshm
+to_bshm <- c(31, 98) 
+deets$Course[to_bshm] <- "BSHM"
+
+# to bs phar
+to_bsphar <- c(44)
+deets$Course[to_bsphar] <- "BS Phar"
+```
+
+```{r}
+# checks the changes
+deets$Course
+```
+
+We didn't change the 'Avionics Technology' since we do not know what's the exact acronym for it.
+
+
+## CATEGORIZING TO DEPARTMENTS
+```{r}
+
+
+# Here, we will now categorize all the 27 courses we got from our data into its designated departments.
+
+course <- deets$Course
+course_factor <- factor(course) #27 levels
+```
+
+```{r}
+# here's how we categorized it
+categorize_course <- function(course) {
+  if (grepl("IT|CS|BSIT|IS", course)) {
+    return("Computer Literature")
+  }
+  else if (grepl("ED|BSED", course)) {
+    return("Education")
+  }
+  else if (grepl("BSA|BSBA", course)) {
+    return("Business and Finance")
+  }
+  else if (grepl("CE", course)) {
+    return("Engineering")
+  }
+  else if (grepl("BSHM", course)) {
+    return("Hospitality Management")
+  }
+  else {
+    return("Other")
+  }
+}
+
+course_categories <- sapply(course, categorize_course)
+```
+
+```{r}
+# count the data of each category
+category_counts <- table(course_categories)
+```
+
+```{r}
+# convert the table to a data frame
+category_counts_df <- as.data.frame(category_counts)
+names(category_counts_df) <- c("Category", "Count")
+```
+
+```{r}
+# create the bar plot for the department
+ggplot(category_counts_df, aes(x = Category, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Course Distribution by Category",
+       x = "Category",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("Computer Literature" = "skyblue",
+                               "Education" = "pink",
+                               "Business and Finance" = "orange",
+                               "Engineering" = "green",
+                               "Hospitality Management" = "yellow",
+                               "Other" = "grey"))
+
+```
+The majority of respondents were from the computer literature department, which is unsurprising given that Adobe applications are software tools. However, the presence of respondents from diverse fields such as business and finance management, education, and engineering indicates the widespread applicability of Adobe software across various disciplines. This diversity suggests that Adobe applications are valued not only within technical domains but also in fields where creative and multimedia skills are increasingly essential.
+
+
+
+# SCHOOL
+```{r}
+school <- deets$School
+
+school_factor <- factor(school)
+
+school_counts <- table(school_factor)
+
+school_counts_df <- as.data.frame(school_counts)
+names(school_counts_df) <- c("School", "Count")
+
+```
+
+```{r}
+# sort the data frame by Count in descending order
+school_counts_df <- school_counts_df[order(-school_counts_df$Count), ]
+```
+
+```{r}
+# creeate the bar plot for school
+ggplot(school_counts_df, aes(x = reorder(School, -Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "School Distribution",
+       x = "School",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_flip()
+
+```
+The primary universities where students use Adobe applications are Iloilo Science and Technology University, followed by PHINMA University of Iloilo, and then West Visayas State University, all these have a majority of students pursuing a computer literature track. This data suggests a strong correlation between the use of Adobe software and educational programs focused on computer literacy.
+
+
+
+
+# YEAR LEVEL
+```{r}
+yrlvl <- deets$`Year-level`
+yrlvl_factor <- factor(yrlvl)
+```
+
+```{r}
+yrlvl_counts <- table(yrlvl_factor)
+```
+
+```{r}
+yrlvl_df <- as.data.frame(yrlvl_counts)
+yrlvl_df$Year_Level <- as.factor(rownames(yrlvl_df))
+```
+
+```{r}
+# on this rmd we simply use the ggplot function(needed to install
+# phantomjs()), 
+# yet on the R file we used plot_ly function.
+
+ggplot(yrlvl_df, aes(x = Year_Level, y = Freq, group = 1)) +
+  geom_line(color = "yellow") +
+  geom_point(color = "yellow", size = 3) +
+  labs(x = "Year Level", y = "Count", title = "Year Level Counts") +
+  theme_minimal()
+```
+
+This shows that the majority of users of Adobe Applications are in their second year, followed by third years come in second, with first years coming next , and fourth years being the least represented.
+
+
+
+# APPLICATIONS USED
+```{r}
+app <- deets$`Here are some list of Adobe Cloud which of these applications do you use?`
+
+```
+
+```{r}
+app_factor <- factor(app)
+```
+
+```{r}
+app_counts <- table(app_factor)
+app_counts_df <- as.data.frame(app_counts)
+names(app_counts_df) <- c("Application", "Count")
+app_counts_df <- app_counts_df[order(-app_counts_df$Count), ]
+```
+
+```{r}
+# plotting with stacked bar plot
+ggplot(data = app_counts_df, aes(x = "", y = Count, fill = Application)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Application Usage Counts",
+       x = NULL,
+       y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        legend.position = "right") +
+  guides(fill=guide_legend(title="Application"))
+```
+
+We used the stacked bar plot on this demographic, so we can all see which color of the application is most used. 
+
+The most used application is Adobe Photoshop, followed by a tie between Adobe Premiere Pro and After Effects. Some applications, such as Dreamweaver and Fresco, appear to be used very little. Some of the respondents list several combination, that may indicate these applications are frequently used together in workflows. For example, the graph shows that Photoshop is often used in conjunction with Illustrator and Lightroom.
+
+
+
+
+
+# GETTING THE MEAN AND STANDARD DEVIATION FOR UTUAT
+```{r}
+#Read the excel file
+questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
+```
+
+```{r}
+conversion <- function(response) {
+  if (response == "Strongly Disagree") {
+    return(1)
+  } else if (response == "Disagree") {
+    return(2)
+  } else if (response == "Neutral") {
+    return(3)
+  } else if (response == "Agree") {
+    return(4)
+  } else {
+    return(5)
+  }
+}
+```
+
+```{r}
+columns_to_convert <- c(10, 11, 12, 14, 17, 19, 20, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32)
+
+for (column_index in columns_to_convert) {
+  questionnaire[[column_index]] <- sapply(questionnaire[[column_index]], conversion)
+}
+```
+
+```{r}
+conversion1 <- function(response) {
+  if (is.na(response)) {
+    return(NA)
+  } else if (response == "Yes") {
+    return(1)
+  } else if (response == "No") {
+    return(2)
+  } else if (response == "Possibly") {
+    return(3)
+  } else {
+    return(NA)
+  }
+}
+```
+
+```{r}
+columns_to_convert1 <- c(9,15,16,18,21,24,33,34,35)
+
+for (column in columns_to_convert1) {
+  questionnaire[[column]] <- sapply(questionnaire[[column]], conversion1)
+}
+```
+
+```{r}
+# Calculate the mean and sd for Performance Expectancy
+performanceExpectancy <- questionnaire[, c(9:11)]
+```
+
+```{r}
+# getting the mean and sd
+means1 <- colMeans(performanceExpectancy, na.rm = TRUE)
+means1
+sd_pe <- sapply(performanceExpectancy, sd, na.rm = TRUE)
+sd_pe
+```
+
+```{r}
+# getting the average
+avg_mean1 <- round(mean(means1), 2)
+avg_mean1
+avg_sd1 <- round(mean(sd_pe), 2)
+avg_sd1
+```
+
+```{r}
+# calculate the mean and sd for Effort Expectancy
+effortExpectancy <- questionnaire[, c(12:14)]
+```
+
+```{r}
+# getting the mean and sd
+means2 <- colMeans(effortExpectancy, na.rm = TRUE)
+means2
+sd_ee <- sapply(effortExpectancy, sd, na.rm = TRUE)
+sd_ee
+```
+
+```{r}
+# average
+avg_mean2 <- round(mean(means2), 2)
+avg_mean2
+avg_sd2 <- round(mean(sd_ee), 2)
+avg_sd2
+```
+
+```{r}
+# Calculate the mean and sd for Social Influence
+socialInfluence <- questionnaire[, c(19:21)]
+```
+
+```{r}
+# getting the mean and sd
+means3 <- colMeans(socialInfluence, na.rm = TRUE) 
+means3
+sd_si <- sapply(socialInfluence, sd, na.rm = TRUE)
+sd_si
+```
+
+```{r}
+# average
+avg_mean3 <- round(mean(means3), 2)
+avg_mean3
+avg_sd3 <- round(mean(sd_si), 2)
+avg_sd3
+```
+
+```{r}
+# Calculate the mean and sd for Facilitating Conditions
+facilitatingConditions <- questionnaire[, c(22:25)]
+```
+
+```{r}
+# getting the mean and sd
+means4 <- colMeans(facilitatingConditions, na.rm = TRUE)
+means4
+sd_fc <- sapply(facilitatingConditions, sd, na.rm = TRUE)
+sd_fc
+```
+
+```{r}
+avg_mean4 <- round(mean(means4), 2)
+avg_mean4
+avg_sd4 <- round(mean(sd_fc), 2)
+avg_sd4
+```
+
+```{r}
+# Calculate the mean and sd for Behavioral Intention to use the system
+behavioralIntention <- questionnaire[, c(33:35)]
+```
+
+```{r}
+# getting the mean and sd
+means5 <- colMeans(behavioralIntention, na.rm = TRUE)
+means5
+sd_bi <- sapply(behavioralIntention, sd, na.rm = TRUE)
+sd_bi
+
+# average
+avg_mean5 <- round(mean(means5), 2)
+avg_mean5
+avg_sd5 <- round(mean(sd_bi), 2)
+avg_sd5
+```
+
+```{r}
+#####Make a data frame of all factors######
+pe <- data.frame(
+  Description = "Performance Expectancy",
+  Mean = means1,
+  SD = sd_pe,
+  Average_Mean = avg_mean1,
+  Average_SD = avg_sd1
+)
+```
+
+```{r}
+ee <- data.frame(
+  Description = "Effort Expectancy",
+  Mean = means2,
+  SD = sd_ee,
+  Average_Mean = avg_mean2,
+  Average_SD = avg_sd2
+)
+```
+
+```{r}
+si <- data.frame(
+  Description = "Social Influence",
+  Mean = means3,
+  SD = sd_si,
+  Average_Mean = avg_mean3,
+  Average_SD = avg_sd3
+)
+```
+
+```{r}
+fc <- data.frame(
+  Description = "Facilitating Conditions",
+  Mean = means4,
+  SD = sd_fc,
+  Average_Mean = avg_mean4,
+  Average_SD = avg_sd4
+)
+```
+
+```{r}
+bi <- data.frame(
+  Description = "Behavioral Intention",
+  Mean = means5,
+  SD = sd_bi,
+  Average_Mean = avg_mean5,
+  Average_SD = avg_sd5
+)
+```
+
+```{r}
+summary <- rbind(pe, ee, si, fc, bi)
+kable(summary)
+```
+
+
