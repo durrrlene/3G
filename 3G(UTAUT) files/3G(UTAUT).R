@@ -48,7 +48,7 @@ for (column in columns_to_convert1) {
   questionnaire[[column]] <- sapply(questionnaire[[column]], conversion1)
 }
 
-View(questionnaire)
+write.xlsx(questionnaire, "3G(UTAUT) files/updated_questionnaire.xlsx")
 
 
 #Mean and Standard Deviation
@@ -145,7 +145,7 @@ bi <- data.frame(
 
 #####Combine all factors using kable() function######
 summary <- rbind(pe, ee, si, fc, bi)
-summary_table<-  kable(summary)
+UATUT_data<-  kable(summary)
 View(summary_table)
 
 
