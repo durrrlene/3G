@@ -8,8 +8,8 @@ library(plotly)
 
 
 
-orig <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
-deets <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
+orig <- read_excel("DataCleaning(3G)/questionnaire3g.xlsx")
+deets <- read_excel("DataCleaning(3G)/questionnaire3g.xlsx")
 
 
 #getting the age average
@@ -238,10 +238,10 @@ ggplot(data = app_counts_df, aes(x = "", y = Count, fill = Application)) +
 
 
 
-  # ------------------------------------ UTAUT ---------------------------
+# ------------------------------------ UTAUT ---------------------------
 
 # Read the Excel file
-questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
+#questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
 
 conversion <- function(response) {
   if (response == "Strongly Disagree") {
@@ -261,7 +261,7 @@ conversion <- function(response) {
 columns_to_convert <- c(10, 11, 12, 14, 17, 19, 20, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32)
 
 for (column_index in columns_to_convert) {
-  questionnaire[[column_index]] <- sapply(questionnaire[[column_index]], conversion)
+  deets[[column_index]] <- sapply(deets[[column_index]], conversion)
 }
 
 
@@ -282,15 +282,15 @@ conversion1 <- function(response) {
 columns_to_convert1 <- c(9,15,16,18,21,24,33,34,35)
 
 for (column in columns_to_convert1) {
-  questionnaire[[column]] <- sapply(questionnaire[[column]], conversion1)
+  deets[[column]] <- sapply(deets[[column]], conversion1)
 }
 
-View(questionnaire)
+View(deets)
 
 
 #Mean and Standard Deviation
 # Calculate the mean and sd for Performance Expectancy
-performanceExpectancy <- questionnaire[, c(9:11)]
+performanceExpectancy <- deets[, c(9:11)]
 
 means1 <- colMeans(performanceExpectancy, na.rm = TRUE)
 sd_pe <- sapply(performanceExpectancy, sd, na.rm = TRUE)
@@ -300,7 +300,7 @@ avg_sd1 <- round(mean(sd_pe), 2)
 
 
 # Calculate the mean and sd for Effort Expectancy
-effortExpectancy <- questionnaire[, c(12:14)]
+effortExpectancy <- deets[, c(12:14)]
 
 means2 <- colMeans(effortExpectancy, na.rm = TRUE)
 sd_ee <- sapply(effortExpectancy, sd, na.rm = TRUE)
@@ -309,7 +309,7 @@ avg_mean2 <- round(mean(means2), 2)
 avg_sd2 <- round(mean(sd_ee), 2)
 
 # Calculate the mean and sd for Social Influence
-socialInfluence <- questionnaire[, c(19:21)]
+socialInfluence <- deets[, c(19:21)]
 
 means3 <- colMeans(socialInfluence, na.rm = TRUE)
 sd_si <- sapply(socialInfluence, sd, na.rm = TRUE)
@@ -318,7 +318,7 @@ avg_mean3 <- round(mean(means3), 2)
 avg_sd3 <- round(mean(sd_si), 2)
 
 # Calculate the mean and sd for Facilitating Conditions
-facilitatingConditions <- questionnaire[, c(22:25)]
+facilitatingConditions <- deets[, c(22:25)]
 
 means4 <- colMeans(facilitatingConditions, na.rm = TRUE)
 sd_fc <- sapply(facilitatingConditions, sd, na.rm = TRUE)
@@ -327,7 +327,7 @@ avg_mean4 <- round(mean(means4), 2)
 avg_sd4 <- round(mean(sd_fc), 2)
 
 # Calculate the mean and sd for Behavioral Intention to use the system
-behavioralIntention <- questionnaire[, c(33:35)]
+behavioralIntention <- deets[, c(33:35)]
 
 means5 <- colMeans(behavioralIntention, na.rm = TRUE)
 sd_bi <- sapply(behavioralIntention, sd, na.rm = TRUE)
@@ -386,6 +386,6 @@ summary_table<-  kable(summary)
 View(summary_table)
 
 
-write.xlsx(deets, "C:/Users/steve/Documents/3G/DataCleaning(3G)/updated_data.xlsx", rowNames = FALSE)
+write.xlsx(deets, "FinalOutput(3G)/updated_data.xlsx", rowNames = FALSE)
 
 

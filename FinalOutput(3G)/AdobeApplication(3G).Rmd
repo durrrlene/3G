@@ -1,6 +1,6 @@
 ---
 title: "tidyingAgeAndCourse"
-author: "Darlene Erl Lapso"
+author: "Lore Faith Sabio"
 date: "`r Sys.Date()`"
 output:
   pdf_document: default
@@ -19,8 +19,8 @@ library(plotly)
 ``` 
 # main files
 ```{r}
-orig <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
-deets <- read_excel("C:/Users/steve/Documents/3G/DataCleaning(3G)/questionnaire3g.xlsx")
+orig <- read_excel("/cloud/project/DataCleaning(3G)/questionnaire3g.xlsx")
+deets <- read_excel("/cloud/project/DataCleaning(3G)/questionnaire3g.xlsx")
 ```
 
 
@@ -322,7 +322,7 @@ The most used application is Adobe Photoshop, followed by a tie between Adobe Pr
 # GETTING THE MEAN AND STANDARD DEVIATION FOR UTUAT
 ```{r}
 #Read the excel file
-questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
+#questionnaire <- read_excel("questionnaire3g.xlsx", sheet = "Form Responses 1")
 ```
 
 ```{r}
@@ -345,7 +345,7 @@ conversion <- function(response) {
 columns_to_convert <- c(10, 11, 12, 14, 17, 19, 20, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32)
 
 for (column_index in columns_to_convert) {
-  questionnaire[[column_index]] <- sapply(questionnaire[[column_index]], conversion)
+  deets[[column_index]] <- sapply(deets[[column_index]], conversion)
 }
 ```
 
@@ -369,13 +369,13 @@ conversion1 <- function(response) {
 columns_to_convert1 <- c(9,15,16,18,21,24,33,34,35)
 
 for (column in columns_to_convert1) {
-  questionnaire[[column]] <- sapply(questionnaire[[column]], conversion1)
+ deets[[column]] <- sapply(deets[[column]], conversion1)
 }
 ```
 
 ```{r}
 # Calculate the mean and sd for Performance Expectancy
-performanceExpectancy <- questionnaire[, c(9:11)]
+performanceExpectancy <- deets[, c(9:11)]
 ```
 
 ```{r}
@@ -396,7 +396,7 @@ avg_sd1
 
 ```{r}
 # calculate the mean and sd for Effort Expectancy
-effortExpectancy <- questionnaire[, c(12:14)]
+effortExpectancy <- deets[, c(12:14)]
 ```
 
 ```{r}
@@ -417,7 +417,7 @@ avg_sd2
 
 ```{r}
 # Calculate the mean and sd for Social Influence
-socialInfluence <- questionnaire[, c(19:21)]
+socialInfluence <- deets[, c(19:21)]
 ```
 
 ```{r}
@@ -438,7 +438,7 @@ avg_sd3
 
 ```{r}
 # Calculate the mean and sd for Facilitating Conditions
-facilitatingConditions <- questionnaire[, c(22:25)]
+facilitatingConditions <- deets[, c(22:25)]
 ```
 
 ```{r}
@@ -458,7 +458,7 @@ avg_sd4
 
 ```{r}
 # Calculate the mean and sd for Behavioral Intention to use the system
-behavioralIntention <- questionnaire[, c(33:35)]
+behavioralIntention <- deets[, c(33:35)]
 ```
 
 ```{r}
